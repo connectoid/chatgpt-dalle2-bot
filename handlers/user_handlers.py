@@ -11,8 +11,10 @@ from aiogram.fsm.state import default_state
 from aiogram.fsm.storage.memory import MemoryStorage
 
 from lexicon.lexicon_ru import LEXICON_HELP, GPT_CHAT_TEXT, DALLE_CHAT_TEXT
-from database.orm import add_user, get_user_id, set_user_openai_token, save_user_prompt
+from database.orm import (add_user, get_user_id, set_user_openai_token, save_user_prompt,
+                          is_premium, change_gpt_free_count, change_gpt_premium_count)
 from keyboards.main_menu import main_menu_keyboard
+from keyboards.profile_menu import profile_menu_keyboard
 from services.chatgpt import get_answer
 from services.dalle2 import get_picture
 from config_data.config import Config, load_config
@@ -71,8 +73,18 @@ async def process_gpt_prompt_sent(message: Message, state: FSMContext):
     await state.update_data(prompt=message.text)
     user_id = get_user_id(message.from_user.id)
     save_user_prompt(user_id, message.text, is_chat_prompt=True)
-    text_answer = get_answer(message.text)
-    await message.answer(text=text_answer)
+    if is_premium(user_id):
+        if not change_gpt_premium_count(user_id):
+            await message.answer(text='У вас не осталось оплаченных запросов, пополните счет')
+        else:
+            text_answer = get_answer(message.text)
+            await message.answer(text=text_answer)
+    else:
+        if not change_gpt_free_count(user_id):
+            await message.answer(text='У вас не осталось бесплатных запросов, пополните счет')
+        else:
+            text_answer = get_answer(message.text)
+            await message.answer(text=text_answer)
 
 
 @router.message(Text(text='DALL-E2 👨‍🎨'), StateFilter(default_state))
@@ -91,6 +103,11 @@ async def process_dalle2_prompt_sent(message: Message, state: FSMContext):
     image_answer = get_picture(message.text)
     await message.answer_photo(photo=image_answer)
 
+
+@router.message(Command(commands='profile'))
+async def process_profile_menu_command(message: Message):
+    user_id = get_user_id(message.from_user.id)
+    await message.answer(text='Настройки профиля', reply_markup=profile_menu_keyboard)
 
 
 @router.message(Command(commands='delmenu'))

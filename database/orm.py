@@ -43,3 +43,35 @@ def save_user_prompt(user_id, prompt, is_chat_prompt=True):
         new_prompt = Prompt(text=prompt, owner=user_id, is_chat_prompt=is_chat_prompt)
         session.add(new_prompt)
         session.commit()
+
+
+def is_premium(user_id):
+    session = Session()
+    user = session.query(User).filter(User.id == user_id).first()
+    if user.is_premium_user:
+        return True
+    return False
+
+
+def change_gpt_premium_count(user_id):
+    session = Session()
+    user = session.query(User).filter(User.id == user_id).first()
+    if user.prepaid_gpt_promts_count > 0:
+        user.prepaid_gpt_promts_count -= 1
+        session.add(user)
+        session.commit()
+        return True
+    else:
+        return False
+
+
+def change_gpt_free_count(user_id):
+    session = Session()
+    user = session.query(User).filter(User.id == user_id).first()
+    if user.free_gpt_promts_count > 0:
+        user.free_gpt_promts_count -= 1
+        session.add(user)
+        session.commit()
+        return True
+    else:
+        return False
