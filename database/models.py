@@ -14,12 +14,12 @@ class User(Base):
     lname = Column(String, nullable=True)
     tg_id = Column(BigInteger, nullable=False)
     openai_token = Column(String, nullable=True)
-    free_gpt_promts_count = Column(Integer, default=10)
-    free_dalle_promts_count = Column(Integer, default=10)
-    prepaid_gpt_promts_count = Column(Integer, default=0)
-    prepaid_dalle_promts_count = Column(Integer, default=0)
+    gpt_prompts_count = Column(Integer, default=10)
+    dalle_prompts_count = Column(Integer, default=10)
+    # prepaid_gpt_promts_count = Column(Integer, default=0)
+    # prepaid_dalle_promts_count = Column(Integer, default=0)
     prompts = relationship('Prompt', backref='users', lazy=True)
-    is_premium_user = Column(Boolean, default=False)
+    # is_premium_user = Column(Boolean, default=False)
     register_date = Column(DateTime, default=datetime.now, nullable=False)
 
     def __repr__(self):

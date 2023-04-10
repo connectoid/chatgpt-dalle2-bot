@@ -53,11 +53,11 @@ def is_premium(user_id):
     return False
 
 
-def change_gpt_premium_count(user_id):
+def change_gpt_count(user_id):
     session = Session()
     user = session.query(User).filter(User.id == user_id).first()
-    if user.prepaid_gpt_promts_count > 0:
-        user.prepaid_gpt_promts_count -= 1
+    if user.gpt_prompts_count > 0:
+        user.gpt_prompts_count -= 1
         session.add(user)
         session.commit()
         return True
@@ -65,13 +65,34 @@ def change_gpt_premium_count(user_id):
         return False
 
 
-def change_gpt_free_count(user_id):
+def change_dalle_count(user_id):
     session = Session()
     user = session.query(User).filter(User.id == user_id).first()
-    if user.free_gpt_promts_count > 0:
-        user.free_gpt_promts_count -= 1
+    if user.dalle_prompts_count > 0:
+        user.dalle_prompts_count -= 1
         session.add(user)
         session.commit()
         return True
     else:
         return False
+
+
+def get_remains(user_id):
+    session = Session()
+    user = session.query(User).filter(User.id == user_id).first()
+    gpt_remains = user.gpt_prompts_count
+    dalle_remains = user.dalle_prompts_count
+    text = (f'У вас осталось:\n'
+            f'Запросов к ChatGPT: {gpt_remains}\n'
+            f'Запросов к DALL-E2: {dalle_remains}\n'
+    )
+    return text
+
+
+def set_user_tariff(user_id, tariff):
+    session = Session()
+    user = session.query(User).filter(User.id == user_id).first()
+    user.gpt_prompts_count = int(tariff)
+    user.dalle_prompts_count = int(tariff)
+    session.add(user)
+    session.commit()
