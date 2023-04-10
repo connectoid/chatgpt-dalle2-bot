@@ -101,11 +101,11 @@ async def process_send_gpt_prompt_command(message: Message, state: FSMContext):
 async def process_gpt_prompt_sent(message: Message, state: FSMContext):
     await state.update_data(prompt=message.text)
     user_id = get_user_id(message.from_user.id)
-    save_user_prompt(user_id, message.text, is_chat_prompt=True)
     if not change_gpt_count(user_id):
         await message.answer(text='У вас не осталось оплаченных запросов, выйдети из диалога и '\
                              'выберите тариф в разделе Профиль')
     else:
+        save_user_prompt(user_id, message.text, is_chat_prompt=True)
         text_answer = get_answer(message.text)
         await message.answer(text=text_answer, reply_markup=answer_menu_keyboard)
 
@@ -122,11 +122,11 @@ async def process_send_dalle2_prompt_command(message: Message, state: FSMContext
 async def process_dalle2_prompt_sent(message: Message, state: FSMContext):
     await state.update_data(prompt=message.text)
     user_id = get_user_id(message.from_user.id)
-    save_user_prompt(user_id, message.text, is_chat_prompt=False)
     if not change_dalle_count(user_id):
         await message.answer(text='У вас не осталось оплаченных запросов, выйдети из диалога и '\
                              'выберите тариф в разделе Профиль')
     else:
+        save_user_prompt(user_id, message.text, is_chat_prompt=False)
         image_answer = get_picture(message.text)
         await message.answer_photo(photo=image_answer, reply_markup=answer_menu_keyboard)
 
@@ -145,7 +145,7 @@ async def process_remains_command(message: Message):
         await message.answer(text=text, reply_markup=profile_menu_keyboard)
 
 
-@router.message(Text(text='💰 Пополнить баланс'))
+@router.message(Text(text='💰 Выбрать тариф'))
 async def process_show_tariffs_command(callback: CallbackQuery):
     user_id = get_user_id(callback.from_user.id)
     await callback.answer(text='Выберите тариф (бесплатно в тестовом режиме):',
