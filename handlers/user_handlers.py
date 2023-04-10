@@ -4,7 +4,7 @@ import openai
 
 from aiogram import Bot, Dispatcher, F, Router
 from aiogram.filters import Command, CommandStart, Text, StateFilter
-from aiogram.types import CallbackQuery, Message, ReplyKeyboardRemove, InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import CallbackQuery, Message, ReplyKeyboardRemove
 from aiogram.filters.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state
@@ -76,6 +76,7 @@ async def process_cancel_command_notstate(message: Message):
 async def process_cancel_command_state(message: Message, state: FSMContext):
     await message.answer(text='Эта команда недоступна в режиме диалога с ИИ. '
                                 'Для вызова данной команды нужно выйти из диалога', reply_markup=answer_menu_keyboard)
+    await state.clear()
 
 
 
@@ -117,39 +118,15 @@ async def process_send_dalle2_prompt_command(message: Message, state: FSMContext
 
 
 @router.message(StateFilter(FSMDallE2.dalle2_text_prompt))
-async def process_dalle2_prompt_sent(callback: CallbackQuery, state: FSMContext):
-    await state.update_data(prompt=callback.text)
-    user_id = get_user_id(callback.from_user.id)
-    repeat_button = InlineKeyboardButton(
-        text='Повторить',
-        callback_data=f'prompt {callback.text}')
-    keyboard = InlineKeyboardMarkup(
-        inline_keyboard=[[repeat_button]])
+async def process_dalle2_prompt_sent(message: Message, state: FSMContext):
+    await state.update_data(prompt=message.text)
+    user_id = get_user_id(message.from_user.id)
+    save_user_prompt(user_id, message.text, is_chat_prompt=False)
     if not change_dalle_count(user_id):
-        await callback.answer(text='У вас не осталось оплаченных запросов, выйдите из диалога и пополните счет')
+        await message.answer(text='У вас не осталось оплаченных запросов, пополните счет')
     else:
-        save_user_prompt(user_id, callback.text, is_chat_prompt=False)
-        image_answer = get_picture(callback.text)
-        await callback.answer_photo(photo=image_answer,
-                          reply_markup=keyboard)
-
-
-@router.callback_query(Text(startswith='prompt'))
-async def process_repeat_dalle_prompt(callback: CallbackQuery, state: FSMContext):
-    prompt = callback.data.split(' ', 1)[1]
-    user_id = get_user_id(callback.from_user.id)
-    repeat_button = InlineKeyboardButton(
-        text='Повторить',
-        callback_data=callback.data)
-    keyboard = InlineKeyboardMarkup(
-        inline_keyboard=[[repeat_button]])
-    if not change_dalle_count(user_id):
-        await callback.answer(text='У вас не осталось оплаченных запросов, выйдите из диалога и пополните счет')
-    else:
-        print('repeated prompt ===========', prompt)
-        image_answer = get_picture(prompt)
-        await callback.message.answer_photo(photo=image_answer,
-                          reply_markup=keyboard)
+        image_answer = get_picture(message.text)
+        await message.answer_photo(photo=image_answer, reply_markup=answer_menu_keyboard)
 
 
 @router.message(Command(commands='profile'), StateFilter(default_state))
