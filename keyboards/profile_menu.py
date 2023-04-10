@@ -2,7 +2,7 @@ from aiogram.types import (KeyboardButton, Message, ReplyKeyboardMarkup,
                            ReplyKeyboardRemove)
 
 button_1: KeyboardButton = KeyboardButton(text='🔢 Остаток заросов')
-button_2: KeyboardButton = KeyboardButton(text='💰 Пополнить баланс')
+button_2: KeyboardButton = KeyboardButton(text='💰 Выбрать тариф')
 button_3: KeyboardButton = KeyboardButton(text='🕑 История запросов')
 button_4: KeyboardButton = KeyboardButton(text='🏠 Главное меню')
 
