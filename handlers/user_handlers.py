@@ -14,7 +14,7 @@ from lexicon.lexicon_ru import LEXICON_HELP, GPT_CHAT_TEXT, DALLE_CHAT_TEXT, STA
 from database.orm import (add_user, get_user_id, set_user_openai_token, save_user_prompt,
                           change_gpt_count, change_dalle_count, get_remains, set_user_tariff)
 from keyboards.main_menu import main_menu_keyboard
-from keyboards.answer_menu import answer_menu_keyboard
+from keyboards.answer_menu import answer_menu_keyboard, answer_repeat_menu_keyboard
 from keyboards.profile_menu import profile_menu_keyboard
 from keyboards.bottom_post_kb import create_bottom_keyboard
 from services.chatgpt import get_answer
@@ -81,8 +81,8 @@ async def process_cancel_command_state(message: Message, state: FSMContext):
 
 
 """ Узнать как объединять фильтры в одном хэндлере """
-@router.message(Text(text='⬅️ Назад в главное меню'), StateFilter(FSMChatGPT.gpt_text_prompt))
-@router.message(Text(text='⬅️ Назад в главное меню'), StateFilter(FSMDallE2.dalle2_text_prompt))
+@router.message(Text(text='⬅️ В главное меню'), StateFilter(FSMChatGPT.gpt_text_prompt))
+@router.message(Text(text='⬅️ В главное меню'), StateFilter(FSMDallE2.dalle2_text_prompt))
 async def process_back_command(message: Message, state: FSMContext):
     await message.answer(text='Вы вышли из диалога',
                          reply_markup=main_menu_keyboard)
@@ -97,7 +97,7 @@ async def process_send_gpt_prompt_command(message: Message, state: FSMContext):
     
 
 
-@router.message(StateFilter(FSMChatGPT.gpt_text_prompt))
+@router.message(StateFilter(FSMChatGPT.gpt_text_prompt), ~Text(text='🔁 Повторить'))
 async def process_gpt_prompt_sent(message: Message, state: FSMContext):
     await state.update_data(prompt=message.text)
     user_id = get_user_id(message.from_user.id)
@@ -107,7 +107,21 @@ async def process_gpt_prompt_sent(message: Message, state: FSMContext):
     else:
         save_user_prompt(user_id, message.text, is_chat_prompt=True)
         text_answer = get_answer(message.text)
-        await message.answer(text=text_answer, reply_markup=answer_menu_keyboard)
+        await message.answer(text=text_answer, reply_markup=answer_repeat_menu_keyboard)
+
+
+@router.message(Text(text='🔁 Повторить'), StateFilter(FSMChatGPT.gpt_text_prompt))
+async def process_repeat_gpt_prompt_command(message: Message, state: FSMContext):
+    prompt_dict = await state.get_data()
+    prompt = prompt_dict['prompt']
+    user_id = get_user_id(message.from_user.id)
+    if not change_gpt_count(user_id):
+        await message.answer(text='У вас не осталось оплаченных запросов, выйдите из диалога и '\
+                             'выберите тариф в разделе Профиль')
+    else:
+        text_answer = get_answer(prompt)
+        await message.answer(text=text_answer, reply_markup=answer_repeat_menu_keyboard)
+
 
 
 @router.message(Text(text='👨‍🎨 DALL-E2'), StateFilter(default_state))
@@ -118,7 +132,7 @@ async def process_send_dalle2_prompt_command(message: Message, state: FSMContext
     
 
 
-@router.message(StateFilter(FSMDallE2.dalle2_text_prompt))
+@router.message(StateFilter(FSMDallE2.dalle2_text_prompt), ~Text(text='🔁 Повторить'))
 async def process_dalle2_prompt_sent(message: Message, state: FSMContext):
     await state.update_data(prompt=message.text)
     user_id = get_user_id(message.from_user.id)
@@ -128,7 +142,20 @@ async def process_dalle2_prompt_sent(message: Message, state: FSMContext):
     else:
         save_user_prompt(user_id, message.text, is_chat_prompt=False)
         image_answer = get_picture(message.text)
-        await message.answer_photo(photo=image_answer, reply_markup=answer_menu_keyboard)
+        await message.answer_photo(photo=image_answer, reply_markup=answer_repeat_menu_keyboard)
+
+
+@router.message(Text(text='🔁 Повторить'), StateFilter(FSMDallE2.dalle2_text_prompt))
+async def process_repeat_dalle2_prompt_command(message: Message, state: FSMContext):
+    prompt_dict = await state.get_data()
+    prompt = prompt_dict['prompt']
+    user_id = get_user_id(message.from_user.id)
+    if not change_gpt_count(user_id):
+        await message.answer(text='У вас не осталось оплаченных запросов, выйдите из диалога и '\
+                             'выберите тариф в разделе Профиль')
+    else:
+        image_answer = get_picture(prompt)
+        await message.answer_photo(photo=image_answer, reply_markup=answer_repeat_menu_keyboard)
 
 
 @router.message(Command(commands='profile'), StateFilter(default_state))
