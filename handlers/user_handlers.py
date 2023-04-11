@@ -102,7 +102,7 @@ async def process_gpt_prompt_sent(message: Message, state: FSMContext):
     await state.update_data(prompt=message.text)
     user_id = get_user_id(message.from_user.id)
     if not change_gpt_count(user_id):
-        await message.answer(text='У вас не осталось оплаченных запросов, выйдети из диалога и '\
+        await message.answer(text='У вас не осталось оплаченных запросов, выйдите из диалога и '\
                              'выберите тариф в разделе Профиль')
     else:
         save_user_prompt(user_id, message.text, is_chat_prompt=True)
@@ -123,7 +123,7 @@ async def process_dalle2_prompt_sent(message: Message, state: FSMContext):
     await state.update_data(prompt=message.text)
     user_id = get_user_id(message.from_user.id)
     if not change_dalle_count(user_id):
-        await message.answer(text='У вас не осталось оплаченных запросов, выйдети из диалога и '\
+        await message.answer(text='У вас не осталось оплаченных запросов, выйдите из диалога и '\
                              'выберите тариф в разделе Профиль')
     else:
         save_user_prompt(user_id, message.text, is_chat_prompt=False)
