@@ -28,8 +28,8 @@ def get_answer(prompt):
             model=engine,
             messages=messages,
         )
-        print(completion)
-        return completion['choices'][0]['message']['content']
+        print(prompt)
+        return completion.choices[0].message.content
 
     except TypeError as error:
         print('Ошибка: ', error)
