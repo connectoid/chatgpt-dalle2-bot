@@ -29,6 +29,7 @@ def get_answer(prompt):
             messages=messages,
         )
         print(prompt)
+        print('++++++++++++++++++++', completion.choices[0].message.content)
         return completion.choices[0].message.content
 
     except TypeError as error:

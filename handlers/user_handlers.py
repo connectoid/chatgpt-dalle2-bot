@@ -107,7 +107,8 @@ async def process_gpt_prompt_sent(message: Message, state: FSMContext):
     else:
         save_user_prompt(user_id, message.text, is_chat_prompt=True)
         text_answer = get_answer(message.text)
-        await message.answer(text=text_answer, reply_markup=answer_repeat_menu_keyboard)
+        print('====================', text_answer)
+        await message.answer(text=str(text_answer), reply_markup=answer_repeat_menu_keyboard, parse_mode="markdown")
 
 
 @router.message(Text(text='🔁 Повторить'), StateFilter(FSMChatGPT.gpt_text_prompt))
@@ -120,7 +121,7 @@ async def process_repeat_gpt_prompt_command(message: Message, state: FSMContext)
                              'выберите тариф в разделе Профиль')
     else:
         text_answer = get_answer(prompt)
-        await message.answer(text=text_answer, reply_markup=answer_repeat_menu_keyboard)
+        await message.answer(text=str(text_answer), reply_markup=answer_repeat_menu_keyboard, parse_mode="markdown")
 
 
 
