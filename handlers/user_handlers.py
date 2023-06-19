@@ -10,7 +10,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state
 from aiogram.fsm.storage.memory import MemoryStorage
 
-from lexicon.lexicon_ru import LEXICON_HELP, GPT_CHAT_TEXT, DALLE_CHAT_TEXT, START_MESSAGE
+from lexicon.lexicon_ru import (LEXICON_HELP, GPT_CHAT_TEXT, DALLE_CHAT_TEXT, START_MESSAGE,
+                                FEEDBACK_TEXT, FEEDBACK_SENT)
 from database.orm import (add_user, get_user_id, set_user_openai_token, save_user_prompt,
                           change_gpt_count, change_dalle_count, get_remains, set_user_tariff)
 from keyboards.main_menu import main_menu_keyboard
@@ -23,11 +24,9 @@ from config_data.config import Config, load_config
 from utils.utils import send_to_admin
 
 
-
 storage = MemoryStorage()
 router = Router()
 config: Config = load_config()
-#test_openai_token = config.open_ai.key
 
 
 class FSMChatGPT(StatesGroup):
@@ -36,6 +35,9 @@ class FSMChatGPT(StatesGroup):
 
 class FSMDallE2(StatesGroup):
     dalle2_text_prompt = State()
+
+class FSMFeedback(StatesGroup):
+    feedback_text = State()
 
 
 @router.message(CommandStart(), StateFilter(default_state))
@@ -46,7 +48,6 @@ async def process_start_command(message: Message):
     tg_id = message.from_user.id
     add_user(tg_id, fname, lname)
     user_id = get_user_id(message.from_user.id)
-    #set_user_openai_token(user_id, test_openai_token)
     await message.answer(
         text=START_MESSAGE,
         reply_markup=main_menu_keyboard
@@ -57,6 +58,29 @@ async def process_start_command(message: Message):
 @router.message(Text(text='🆘 Помощь'))
 async def process_help_command(message: Message):
     await message.answer(text=LEXICON_HELP, disable_web_page_preview=True)
+
+
+@router.message(Command(commands='feedback'), StateFilter(default_state))
+async def process_feedback_command(message: Message, state: FSMContext):
+    await message.answer(text=FEEDBACK_TEXT)
+    await state.set_state(FSMFeedback.feedback_text)
+
+
+@router.message(StateFilter(FSMFeedback.feedback_text))
+async def process_feedback_sent(message: Message, state: FSMContext):
+    await state.update_data(message_text=message.text)
+    user_tg_id = message.from_user.id
+    user_name = f'{message.from_user.first_name} {message.from_user.last_name}'
+    user_login = message.from_user.username
+    user_link = f'[{user_login}](tg://user?id={str(user_tg_id)})'
+    await send_to_admin(
+            message,
+            text=f'Сообщение от пользователя {user_name} ({user_link}): {message.text}',
+            parse_mode='Markdown'
+        )
+    await message.answer(text=FEEDBACK_SENT)
+    await state.clear()
+
 
 
 @router.message(Command(commands='cancel'), ~StateFilter(default_state))
@@ -76,9 +100,9 @@ async def process_cancel_command_notstate(message: Message):
 @router.message(Command(commands='help'), ~StateFilter(default_state))
 async def process_cancel_command_state(message: Message, state: FSMContext):
     await message.answer(text='Эта команда недоступна в режиме диалога с ИИ. '
-                                'Для вызова данной команды нужно выйти из диалога', reply_markup=answer_menu_keyboard)
-    await state.clear()
-
+                                'Для вызова данной команды нужно выйти из диалога '
+                                'командой /cancel или вы можете продолжить диалог.',
+                                reply_markup=answer_menu_keyboard)
 
 
 """ Узнать как объединять фильтры в одном хэндлере """
@@ -110,7 +134,6 @@ async def process_gpt_prompt_sent(message: Message, state: FSMContext):
         save_user_prompt(user_id, message.text, is_chat_prompt=True)
         text_answer = get_answer(message.text, user_id)
         await message.answer(text=str(text_answer), reply_markup=answer_repeat_menu_keyboard, parse_mode="markdown")
-        print(f'++++++++++ {message.from_user.id == config.tg_bot.admin_chat_id}')
         if str(message.from_user.id) != str(config.tg_bot.admin_chat_id):
             await send_to_admin(
                 message,
@@ -205,9 +228,6 @@ async def process_choice_tariff(callback: CallbackQuery):
     user_id = get_user_id(callback.from_user.id)
     set_user_tariff(user_id, tariff)
     await callback.message.answer(text=f'Выбран тариф {tarii_name}')
-    #await callback.message.edit_reply_markup(reply_markup=create_bottom_keyboard(
-    #                id, 'Подробно', '❎ Из избранного'))
-    #await callback.answer()
 
 
 @router.message(Text(text='🕑 История запросов'))

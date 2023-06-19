@@ -25,16 +25,13 @@ async def main():
     config: Config = load_config()
 
     bot = Bot(token=config.tg_bot.token, parse_mode='HTML')
-    #openai.api_key = config.open_ai.key
     dp = Dispatcher(storage=storage)
-
 
     dp.include_router(user_handlers.router)
     dp.include_router(other_handlers.router)
 
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
-
     await set_commands_menu(bot)
     
 

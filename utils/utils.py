@@ -15,5 +15,5 @@ ADMIN_CHAT_ID = config.tg_bot.admin_chat_id
 
 
 @dp.message()
-async def send_to_admin(message: types.Message, text: str):
-    await bot.send_message(chat_id=ADMIN_CHAT_ID, text=text)
+async def send_to_admin(message: types.Message, text: str, parse_mode):
+    await bot.send_message(chat_id=ADMIN_CHAT_ID, text=text, parse_mode=parse_mode)

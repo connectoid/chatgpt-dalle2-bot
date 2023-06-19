@@ -13,7 +13,6 @@ class User(Base):
     fname = Column(String, nullable=True)
     lname = Column(String, nullable=True)
     tg_id = Column(BigInteger, nullable=False)
-    #openai_token = Column(String, nullable=True)
     gpt_prompts_count = Column(Integer, default=10)
     dalle_prompts_count = Column(Integer, default=10)
     prompts = relationship('Prompt', backref='users', lazy=True)
