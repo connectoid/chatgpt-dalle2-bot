@@ -20,13 +20,14 @@ from keyboards.bottom_post_kb import create_bottom_keyboard
 from services.chatgpt import get_answer
 from services.dalle2 import get_picture
 from config_data.config import Config, load_config
+from utils.utils import send_to_admin
 
 
 
 storage = MemoryStorage()
 router = Router()
 config: Config = load_config()
-test_openai_token = config.open_ai.key
+#test_openai_token = config.open_ai.key
 
 
 class FSMChatGPT(StatesGroup):
@@ -45,7 +46,7 @@ async def process_start_command(message: Message):
     tg_id = message.from_user.id
     add_user(tg_id, fname, lname)
     user_id = get_user_id(message.from_user.id)
-    set_user_openai_token(user_id, test_openai_token)
+    #set_user_openai_token(user_id, test_openai_token)
     await message.answer(
         text=START_MESSAGE,
         reply_markup=main_menu_keyboard
@@ -101,28 +102,41 @@ async def process_send_gpt_prompt_command(message: Message, state: FSMContext):
 async def process_gpt_prompt_sent(message: Message, state: FSMContext):
     await state.update_data(prompt=message.text)
     user_id = get_user_id(message.from_user.id)
+    user_name = f'{message.from_user.first_name} {message.from_user.last_name}'
     if not change_gpt_count(user_id):
         await message.answer(text='У вас не осталось оплаченных запросов, выйдите из диалога и '\
                              'выберите тариф в разделе Профиль')
     else:
         save_user_prompt(user_id, message.text, is_chat_prompt=True)
-        text_answer = get_answer(message.text)
-        print('====================', text_answer)
+        text_answer = get_answer(message.text, user_id)
         await message.answer(text=str(text_answer), reply_markup=answer_repeat_menu_keyboard, parse_mode="markdown")
-
+        print(f'++++++++++ {message.from_user.id == config.tg_bot.admin_chat_id}')
+        if str(message.from_user.id) != str(config.tg_bot.admin_chat_id):
+            await send_to_admin(
+                message,
+                text=f'Пользователь {user_name} '\
+                f'отправил запрос:\n"{message.text}" \n'\
+                f'и получил ответ:\n"{text_answer}"'
+                )
 
 @router.message(Text(text='🔁 Повторить'), StateFilter(FSMChatGPT.gpt_text_prompt))
 async def process_repeat_gpt_prompt_command(message: Message, state: FSMContext):
     prompt_dict = await state.get_data()
     prompt = prompt_dict['prompt']
     user_id = get_user_id(message.from_user.id)
+    user_name = f'{message.from_user.first_name} {message.from_user.last_name}'
     if not change_gpt_count(user_id):
         await message.answer(text='У вас не осталось оплаченных запросов, выйдите из диалога и '\
                              'выберите тариф в разделе Профиль')
     else:
-        text_answer = get_answer(prompt)
+        text_answer = get_answer(prompt, user_id)
         await message.answer(text=str(text_answer), reply_markup=answer_repeat_menu_keyboard, parse_mode="markdown")
-
+        if str(message.from_user.id) != str(config.tg_bot.admin_chat_id):
+            await send_to_admin(
+                message,
+                text=f'Пользователь {user_name} '\
+                f'повторил запрос и получил ответ:\n"{text_answer}"'
+                )
 
 
 @router.message(Text(text='👨‍🎨 DALL-E2'), StateFilter(default_state))

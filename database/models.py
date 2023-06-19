@@ -13,13 +13,10 @@ class User(Base):
     fname = Column(String, nullable=True)
     lname = Column(String, nullable=True)
     tg_id = Column(BigInteger, nullable=False)
-    openai_token = Column(String, nullable=True)
+    #openai_token = Column(String, nullable=True)
     gpt_prompts_count = Column(Integer, default=10)
     dalle_prompts_count = Column(Integer, default=10)
-    # prepaid_gpt_promts_count = Column(Integer, default=0)
-    # prepaid_dalle_promts_count = Column(Integer, default=0)
     prompts = relationship('Prompt', backref='users', lazy=True)
-    # is_premium_user = Column(Boolean, default=False)
     register_date = Column(DateTime, default=datetime.now, nullable=False)
 
     def __repr__(self):
@@ -35,3 +32,10 @@ class Prompt(Base):
 
     def __repr__(self):
         return self.text
+    
+
+class ApiKey(Base):
+    __tablename__ = 'api_key'
+    id = Column(Integer, primary_key=True)
+    api_key_string = Column(String, nullable=False)
+    active = Column(Boolean, default=True)

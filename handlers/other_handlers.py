@@ -6,4 +6,4 @@ router: Router = Router()
 
 @router.message()
 async def send_echo(message: Message):
-    await message.answer(f'Неизвестная команда: {message.text}')
+    await message.answer(f'Неизвестная команда: "{message.text}" или требуется перезапуск бота командой /start')

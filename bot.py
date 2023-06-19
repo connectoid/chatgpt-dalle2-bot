@@ -25,7 +25,7 @@ async def main():
     config: Config = load_config()
 
     bot = Bot(token=config.tg_bot.token, parse_mode='HTML')
-    openai.api_key = config.open_ai.key
+    #openai.api_key = config.open_ai.key
     dp = Dispatcher(storage=storage)
 
 

@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
 
-from .models import Base, User, Prompt
+from .models import Base, User, Prompt, ApiKey
 from config_data.config import load_config, Config
 
 config: Config = load_config()
@@ -95,4 +95,18 @@ def set_user_tariff(user_id, tariff):
     user.gpt_prompts_count = int(tariff)
     user.dalle_prompts_count = int(tariff)
     session.add(user)
+    session.commit()
+
+
+def get_openai_api_key():
+    session = Session()
+    api_key = session.query(ApiKey).filter(ApiKey.active == True).first()
+    return api_key.api_key_string
+
+
+def disable_openai_api_key(api_key_string):
+    session = Session()
+    api_key = session.query(ApiKey).filter(ApiKey.api_key_string == api_key_string).first()
+    api_key.active = False
+    session.add(api_key)
     session.commit()
