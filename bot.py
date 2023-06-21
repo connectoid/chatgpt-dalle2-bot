@@ -27,6 +27,8 @@ async def main():
     bot = Bot(token=config.tg_bot.token, parse_mode='HTML')
     dp = Dispatcher(storage=storage)
 
+    print()
+
     dp.include_router(user_handlers.router)
     dp.include_router(other_handlers.router)
 

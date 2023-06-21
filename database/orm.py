@@ -82,11 +82,11 @@ def get_remains(user_id):
     user = session.query(User).filter(User.id == user_id).first()
     gpt_remains = user.gpt_prompts_count
     dalle_remains = user.dalle_prompts_count
-    text = (f'У вас осталось:\n'
-            f'Запросов к ChatGPT: {gpt_remains}\n'
-            f'Запросов к DALL-E2: {dalle_remains}\n'
-    )
-    return text
+    # text = (f'У вас осталось:\n'
+    #        f'ChatGPT: {gpt_remains}\n'
+    #        f'DALL-E2: {dalle_remains}\n'
+    #)
+    return gpt_remains, dalle_remains
 
 
 def set_user_tariff(user_id, tariff):
@@ -110,3 +110,18 @@ def disable_openai_api_key(api_key_string):
     api_key.active = False
     session.add(api_key)
     session.commit()
+
+
+def get_user_lang(user_id):
+    session = Session()
+    user_lang = session.query(User).filter(User.id == user_id).first().language
+    return user_lang
+
+
+def set_user_lang(user_id, user_lang):
+    session = Session()
+    user = session.query(User).filter(User.id == user_id).first()
+    user.language = user_lang
+    session.add(user)
+    session.commit()
+

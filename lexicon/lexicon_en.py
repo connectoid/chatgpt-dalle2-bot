@@ -1,11 +1,11 @@
 """ Тексты командного меню """
 
 LEXICON_COMMANDS = {
-                '/start': 'Запуск бота (если перестал работать)',
-                '/cancel': 'Выйти из диалого с ИИ',
-                '/profile': 'Перейти в профиль пользователя',
-                '/feedback': 'Написать админу',
-                '/help': 'Справка'}
+                '/start': 'Starts bot (or if it stopping working)',
+                '/cancel': 'Exit the dialogue with AI',
+                '/profile': 'Go to user profile',
+                '/feedback': 'Message to admin',
+                '/help': 'Help'}
 
 """ Тексты сообщений """
 
@@ -46,11 +46,11 @@ UNRECOGNIZED_COMMAND = 'Неизвестная команда или требу�
 
 """ Тексты кнопок """
 
-MAIN_MENU_BUTTON = '🏠 Главное меню'
-HELP_BUTTON = '🆘 Помощь'
-TO_MAIN_MENU_BUTTON = '⬅️ В главное меню'
-REPEAT_BUTTON = '🔁 Повторить'
-PROFILE_BUTTON = 'ℹ️ Профиль'
-REMAINS_BUTTON = '🔢 Остаток заросов'
-TARIFF_BUTTON = '💰 Выбрать тариф'
-HISTORY_BUTTON = '🕑 История запросов'
+MAIN_MENU_BUTTON = '🏠 Main menu'
+HELP_BUTTON = '🆘 Help'
+TO_MAIN_MENU_BUTTON = '⬅️ To main menu'
+REPEAT_BUTTON = '🔁 Repeat'
+PROFILE_BUTTON = 'ℹ️ Profile'
+REMAINS_BUTTON = '🔢 Rest of requests'
+TARIFF_BUTTON = '💰 Choose a tariff'
+HISTORY_BUTTON = '🕑 Requests history'

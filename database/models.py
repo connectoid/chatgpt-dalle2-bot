@@ -17,6 +17,7 @@ class User(Base):
     dalle_prompts_count = Column(Integer, default=10)
     prompts = relationship('Prompt', backref='users', lazy=True)
     register_date = Column(DateTime, default=datetime.now, nullable=False)
+    language = Column(String, nullable=False, default='ru')
 
     def __repr__(self):
         return self.tg_id
