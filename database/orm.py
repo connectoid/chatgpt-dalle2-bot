@@ -121,7 +121,7 @@ def set_user_tariff(user_id, tariff_id):
     user = session.query(User).filter(User.id == user_id).first()
     user_tariff = session.query(Tariff).filter(Tariff.id == tariff_id).first()
     user.tariff_id = tariff_id
-    print(f'####### user:{user}, user_tariff:{user_tariff}, tariff_id:{tariff_id}')
+    print(user_tariff, tariff_id)
     user.gpt_prompts_count = user_tariff.gpt_amount
     user.dalle_prompts_count = user_tariff.dalle_amount
     session.add(user)
