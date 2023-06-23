@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
 
-from .models import Base, User, Prompt, ApiKey
+from .models import Base, User, Prompt, ApiKey, Tariff
 from config_data.config import load_config, Config
 
 config: Config = load_config()
@@ -89,15 +89,6 @@ def get_remains(user_id):
     return gpt_remains, dalle_remains
 
 
-def set_user_tariff(user_id, tariff):
-    session = Session()
-    user = session.query(User).filter(User.id == user_id).first()
-    user.gpt_prompts_count = int(tariff)
-    user.dalle_prompts_count = int(tariff)
-    session.add(user)
-    session.commit()
-
-
 def get_openai_api_key():
     session = Session()
     api_key = session.query(ApiKey).filter(ApiKey.active == True).first()
@@ -125,3 +116,30 @@ def set_user_lang(user_id, user_lang):
     session.add(user)
     session.commit()
 
+def set_user_tariff(user_id, tariff_id):
+    session = Session()
+    user = session.query(User).filter(User.id == user_id).first()
+    user_tariff = session.query(Tariff).filter(Tariff.id == tariff_id).first()
+    user.tariff_id = tariff_id
+    user.gpt_prompts_count = user_tariff.gpt_amount
+    user.dalle_prompts_count = user_tariff.dalle_amount
+    session.add(user)
+    session.commit()
+
+def get_user_tariff(user_id):
+    session = Session()
+    user = session.query(User).filter(User.id == user_id).first()    
+    tariff = user.tariff
+    if tariff:
+        return tariff
+    return None
+    
+def get_tariffs():
+    session = Session()
+    tariffs = session.query(Tariff).all()
+    return tariffs
+
+def get_tariff_by_id(tariff_id):
+    session = Session()
+    tariff = session.query(Tariff).filter(Tariff.id == tariff_id).first()
+    return tariff

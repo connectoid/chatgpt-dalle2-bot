@@ -33,7 +33,7 @@ MESSAGE = {'ru': {
                 'сводить финансовые таблицы, писать сценарии, стихи и давать подробные гайды по любым '\
                 'интересующим вас тематикам. Попробуйте задать ему вопрос, например "Напиши реферат на тему '\
                 'Морские животные Арктики" или "Создай регулярку для всех телефонных номеров России". '\
-                '<s><i>(note: Написать об ограничениях версии ChatGPT 3.0).</i></s>\n\n'\
+                '\n\n'\
                 'Второй ИИ, представленный в данном боте, это <b>DALL-E2</b>. Это новый алгоритм нейронной сети, '\
                 'который создает картинку из предоставленной вами короткой фразы или предложения. '\
                 'Данный ИИ, так же как и ChatGPT понимает русский язык, но лучших результатов '\
@@ -51,7 +51,8 @@ MESSAGE = {'ru': {
                 'DALLE_CHAT_TEXT': 'Пожалуйста, вводите запросы (prompt) к ChatGPT в режиме диалога. '\
                 'Для выхода из диалога с ChatGPT',
 
-                'START_MESSAGE': 'Вы запустили бот ChatGPT/DALL-E2. Выберите ИИ с которым будете вести диалог. '\
+                'START_MESSAGE': 'Вы запустили бот ChatGPT/DALL-E2. Выберите в нижнем меню ИИ с которым '\
+                'будете вести диалог (ChatGPT или DALL-E2). '\
                 'Подробнее о возможностях данного бота можно почитать в разделе "🆘 Помощь" '\
                 'или вызвав команду /help',
 
@@ -61,9 +62,11 @@ MESSAGE = {'ru': {
 
                 'FEEDBACK_SENT': 'Ваше сообщение отправлено!',
 
-                'UNRECOGNIZED_COMMAND': 'Неизвестная команда или требуется перезапуск бота командой /start',
+                'UNRECOGNIZED_COMMAND': 'Неизвестная команда или вы задаете вопрос не находясь в диалоге с ИИ. '\
+                'Пожалуйста, выберите ChatGPT или DALL-E2  внижнем меню. Если данных пунктов нет в меню, '\
+                'выполните команду /start',
                 'LANG': 'Выберите ваш язык. Choose your language',
-                'LANG_CHOSEN': 'Язык выбран (Применение перевода текста командного-меню займет какое-то '\
+                'LANG_CHOSEN': 'Язык выбран (Применение перевода текста командного меню займет какое-то '\
                 'время, чтобы ускорить вы можете перезагрузить приложение: ',
                 'EXIT_DIALOGUE': 'Вы вышли из диалога',
                 'NOT_IN_DIALOGUE': 'В данный момент вы не ведёте диалог. Выберите в главном меню ИИ для диалога',
@@ -71,12 +74,13 @@ MESSAGE = {'ru': {
                 'NOT_IN_DIALOGUE': 'В данный момент вы не ведёте диалог. Выберите в главном меню ChatGPT или DALL-E2 для диалога',
                 'DENIED_IN_DIALOGUE': 'Эта команда недоступна в режиме диалога с ИИ. Для вызова данной команды '\
                 'нужно выйти из диалога командой /cancel или вы можете продолжить диалог.',
-                'LIMIT_RICHED': 'У вас не осталось оплаченных запросов, выйдите из диалога и '\
-                'выберите тариф в разделе Профиль',
+                'LIMIT_RICHED': 'У вас не осталось оплаченных запросов, выйдите из диалога командой /cancel и '\
+                'выберите тариф в разделе Профиль /profile',
                 'CHOOSE_SECTION': 'Выберите раздел',
                 'UNDER_DEVELOPMENT': '👷‍♂️ Данный раздел пока в разработке',
                 'TARIFF_SELECTED': 'Выбран тариф',
                 'PROMPTS_REMAINS': 'У вас осталось запросов:',
+                'YOUR_TARIFF': 'Ваш тариф: ',
                 
             },
 
@@ -91,7 +95,7 @@ MESSAGE = {'ru': {
                 'tables, writing scripts, poems, and providing detailed guides on any topics of '\
                 'interest to you. Try asking him a question, such as "Write me an essay on the topic '\
                 'of Arctic marine life" or "Create a regular expression for all phone numbers in '\
-                'Russia". <s><i>(note: Write about the limitations of ChatGPT 3.0).</i></s>\n\n'\
+                'Russia".\n\n'\
                 'The second AI presented in this bot is <b>DALL-E2</b>. This is a new neural network '\
                 'algorithm that creates an image from a short phrase or sentence provided by you. '\
                 'This AI, like ChatGPT, understands Russian, but better results can be achieved by '\
@@ -111,8 +115,8 @@ MESSAGE = {'ru': {
                 'To exit the ChatGPT dialogue and return to the main menu, enter the /cancel command '\
                 'or click the button below.',
 
-                'START_MESSAGE': 'You have launched the ChatGPT/DALL-E2 bot. Choose the AI with '\
-                'which you want to have a dialog. Read more about the possibilities of this bot '\
+                'START_MESSAGE': 'You have launched the ChatGPT/DALL-E2 bot. Choose an AI to dialogue '\
+                'with in the bottom menu (ChatGPT or DALL-E2). Read more about the possibilities of this bot '\
                 'in the "🆘 Help" section or by calling the /help command.',
 
                 'FEEDBACK_TEXT': 'Enter your message, it will be sent to the administrator. '\
@@ -121,7 +125,9 @@ MESSAGE = {'ru': {
 
                 'FEEDBACK_SENT': 'Your message has been sent!',
 
-                'UNRECOGNIZED_COMMAND': 'Unknown command or bot restart required with the command /start.',
+                'UNRECOGNIZED_COMMAND': 'Unknown command or you are asking a question outside of the '\
+                'AI dialog. Please select ChatGPT or DALL-E2 in the bottom menu. If these options are '\
+                'not visible in the menu, please execute the command /start',
                 'LANG': 'Выберите ваш язык. Choose your language',
                 'LANG_CHOSEN': 'Language has been chosen (Applying the command-menu translation may '\
                 'take some time, to speed it up you can restart the application): ',
@@ -133,12 +139,13 @@ MESSAGE = {'ru': {
                 'DENIED_IN_DIALOGUE': 'This command is not available in AI dialog mode. '\
                 'To use this command,  you need to exit the dialog by using the /cancel '\
                 'command or you can continue the dialog.',
-                'LIMIT_RICHED': 'You have no paid requests left, please exit the dialog '\
-                'and select a tariff in the Profile section.',
+                'LIMIT_RICHED': 'You have no paid requests left, please exit the dialog by command /cancel '\
+                'and select a tariff in the Profile section /profile.',
                 'CHOOSE_SECTION': 'Please select a section.',
                 'UNDER_DEVELOPMENT': '👷‍♂️ This section is still under development.',
                 'TARIFF_SELECTED': 'Tariff selected',
                 'PROMPTS_REMAINS': 'You have requests left:',
+                'YOUR_TARIFF': 'Your tariff: ',
             },
 }
 

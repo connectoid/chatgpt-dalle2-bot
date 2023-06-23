@@ -6,6 +6,18 @@ from sqlalchemy.orm import relationship
 
 Base = declarative_base()
  
+class Tariff(Base):
+    __tablename__ = 'tariff'
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+    price = Column(Integer, nullable=False)
+    gpt_amount = Column(Integer, nullable=False)
+    dalle_amount = Column(Integer, nullable=False)
+    users = relationship("User", back_populates="tariff")
+
+
+    def __repr__(self):
+        return self.name
 
 class User(Base):
     __tablename__ = 'user'
@@ -13,8 +25,10 @@ class User(Base):
     fname = Column(String, nullable=True)
     lname = Column(String, nullable=True)
     tg_id = Column(BigInteger, nullable=False)
-    gpt_prompts_count = Column(Integer, default=10)
-    dalle_prompts_count = Column(Integer, default=10)
+    gpt_prompts_count = Column(Integer)
+    dalle_prompts_count = Column(Integer)
+    tariff_id = Column(Integer, ForeignKey('tariff.id'))
+    tariff = relationship('Tariff', back_populates='users')
     prompts = relationship('Prompt', backref='users', lazy=True)
     register_date = Column(DateTime, default=datetime.now, nullable=False)
     language = Column(String, nullable=False, default='ru')

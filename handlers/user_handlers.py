@@ -3,6 +3,7 @@ from time import sleep
 import openai
 
 from aiogram import Bot, Dispatcher, F, Router
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import Command, CommandStart, Text, StateFilter
 from aiogram.types import CallbackQuery, Message, ReplyKeyboardRemove
 from aiogram.filters.state import State, StatesGroup
@@ -17,11 +18,12 @@ from lexicon.lexicon_en import (LEXICON_HELP, GPT_CHAT_TEXT, DALLE_CHAT_TEXT, ST
 from lexicon.lexicon import MESSAGE, BUTTON, TARIFF, BROADCAST
 from database.orm import (add_user, get_user_id, set_user_openai_token, save_user_prompt,
                           change_gpt_count, change_dalle_count, get_remains, set_user_tariff,
-                          set_user_lang, get_user_lang)
+                          set_user_lang, get_user_lang, get_user_tariff,
+                          get_tariffs, get_tariff_by_id)
 from keyboards.main_menu import get_main_menu
 from keyboards.answer_menu import get_answer_menu, get_answer_repeat_menu
 from keyboards.profile_menu import get_profile_menu
-from keyboards.bottom_post_kb import create_bottom_keyboard
+from keyboards.bottom_post_kb import create_bottom_keyboard, create_tariffs_keyboard
 from keyboards.lang_menu import get_lang_menu
 from keyboards.commands_menu import set_commands_menu
 from services.chatgpt import get_answer
@@ -45,7 +47,18 @@ class FSMFeedback(StatesGroup):
     feedback_text = State()
 
 lang = 'ru'
+broadcast_list = [
+    '101676827'     # i am
+    '138269086',    # Andrey
+    '5352380322',   # Nadya
+    '225164946',    # Nastya
+    '1867657064',   # Oleg
+    '1841803568',   # Nikita
+    '1663353031',   # Marina
+    '258516554',    # Polina
+    ]
 
+test_broadcast_list = ['123456789']
 
 @router.message(CommandStart(), StateFilter(default_state))
 @router.message(Text(text=BUTTON['ru']['MAIN_MENU_BUTTON']))
@@ -58,6 +71,11 @@ async def process_start_command(message: Message, bot: Bot):
     user_id = get_user_id(message.from_user.id)
     global lang
     lang = get_user_lang(user_id)
+    tariff = get_user_tariff(user_id)
+    print('TARIFF:', tariff)
+    if not tariff:
+        print(f'Setting free tariff for user {user_id}')
+        set_user_tariff(user_id, 0)
     await set_commands_menu(bot, user_id)
     await message.answer(
         text=MESSAGE[lang]['START_MESSAGE'],
@@ -77,8 +95,7 @@ async def process_cancel_command_state(message: Message, state: FSMContext):
 @router.message(Command(commands='lang'), ~StateFilter(default_state))
 async def process_cancel_command_state(message: Message, state: FSMContext):
     user_id = get_user_id(message.from_user.id)
-    await message.answer(text=MESSAGE[lang]['DENIED_IN_DIALOGUE'],
-                                reply_markup=get_answer_menu(user_id))
+    await message.answer(text=MESSAGE[lang]['DENIED_IN_DIALOGUE'])
 
 @router.message(Command(commands='help'), StateFilter(default_state))
 @router.message(Text(text=BUTTON['ru']['HELP_BUTTON']))
@@ -89,10 +106,15 @@ async def process_help_command(message: Message):
 @router.message(Command(commands='lang'), StateFilter(default_state))
 async def process_lang_command(callback: CallbackQuery):
     user_id = get_user_id(callback.from_user.id)
+    global lang
+    lang = get_user_lang(user_id)
+    mark_ru = mark_en = '✔️ '
+    if lang == 'ru': mark_en = ''
+    else: mark_ru = ''
     await callback.answer(text=MESSAGE[lang]['LANG'],
                           reply_markup=create_bottom_keyboard(
-                            BUTTON[lang]['RUS_LANG_BUTTON'],
-                            BUTTON[lang]['ENG_LANG_BUTTON'],),
+                            mark_ru + BUTTON[lang]['RUS_LANG_BUTTON'],
+                            mark_en + BUTTON[lang]['ENG_LANG_BUTTON'],),
                             parse_mode='HTML'
                         )
 
@@ -112,7 +134,7 @@ async def process_choice_tariff(callback: CallbackQuery, bot: Bot):
 
 @router.message(Command(commands='feedback'), StateFilter(default_state))
 async def process_feedback_command(message: Message, state: FSMContext):
-    await message.answer(text=MESSAGE[lang]['FEEDBACK_TEXT'])
+    await message.answer(text=MESSAGE[lang]['FEEDBACK_TEXT'], reply_markup=ReplyKeyboardRemove())
     await state.set_state(FSMFeedback.feedback_text)
 
 
@@ -251,8 +273,10 @@ async def process_remains_command(message: Message):
         global lang
         lang = get_user_lang(user_id)
         gpt_remains, dalle_remains = get_remains(user_id)
+        tariff = get_user_tariff(user_id)
+        tariff_phrase = MESSAGE[lang]['YOUR_TARIFF']
         remains_phrase = MESSAGE[lang]['PROMPTS_REMAINS']
-        text = (f'{remains_phrase}\n'
+        text = (f'{tariff_phrase} {tariff.name}\n{remains_phrase}\n'
             f'ChatGPT: {gpt_remains}\n'
             f'DALL-E2: {dalle_remains}\n')
         await message.answer(text=text, reply_markup=get_profile_menu(user_id))
@@ -264,25 +288,23 @@ async def process_show_tariffs_command(callback: CallbackQuery):
     user_id = get_user_id(callback.from_user.id)
     global lang
     lang = get_user_lang(user_id)
+    tariffs = get_tariffs()
     await callback.answer(text=MESSAGE[lang]['CHOOSE_TARIFF'],
-                          reply_markup=create_bottom_keyboard(
-                            TARIFF[lang]['tariff-1'],
-                            TARIFF[lang]['tariff-2'], 
-                            TARIFF[lang]['tariff-3']),
+                          reply_markup=create_tariffs_keyboard(
+                            tariffs),
                             parse_mode='HTML')
 
 
-@router.callback_query(Text(startswith='Тариф'))
-@router.callback_query(Text(startswith='Tariff'))
+@router.callback_query(Text(startswith='tariff'))
 async def process_choice_tariff(callback: CallbackQuery):
-    tariff = callback.data.split('(')[1].split()[0]
-    tarii_name = callback.data
+    tariff_id = int(callback.data.split()[1])
+    tariiff_name = get_tariff_by_id(tariff_id).name
     user_id = get_user_id(callback.from_user.id)
     global lang
     lang = get_user_lang(user_id)
-    set_user_tariff(user_id, tariff)
+    set_user_tariff(user_id, tariff_id)
     TARIFF_SELECTED = MESSAGE[lang]['TARIFF_SELECTED']
-    await callback.message.answer(text=f'{TARIFF_SELECTED} {tarii_name}')
+    await callback.message.answer(text=f'{TARIFF_SELECTED} {tariiff_name}')
 
 
 @router.message(Text(text=BUTTON['ru']['HISTORY_BUTTON']))
@@ -306,6 +328,11 @@ async def process_feedback_command(message: Message, bot: Bot):
     global lang
     lang = get_user_lang(user_id)
     text=BROADCAST[lang]['whats_new']
-    users = ['101676827']
+    users = broadcast_list
     for user_id in users:
-        await bot.send_message(chat_id=user_id, text=text)
+        try:
+            await bot.send_message(chat_id=user_id, text=text)
+        except TelegramBadRequest as error:
+            print(f'Telegram Exception: {error}')
+            await message.answer(text=f'Несуществующий Telegram ID: {user_id}')
+
