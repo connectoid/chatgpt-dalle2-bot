@@ -19,11 +19,11 @@ from lexicon.lexicon import MESSAGE, BUTTON, TARIFF, BROADCAST
 from database.orm import (add_user, get_user_id, set_user_openai_token, save_user_prompt,
                           change_gpt_count, change_dalle_count, get_remains, set_user_tariff,
                           set_user_lang, get_user_lang, get_user_tariff,
-                          get_tariffs, get_tariff_by_id)
+                          get_tariffs, get_tariff_by_id, get_recent_prompts)
 from keyboards.main_menu import get_main_menu
 from keyboards.answer_menu import get_answer_menu, get_answer_repeat_menu
 from keyboards.profile_menu import get_profile_menu
-from keyboards.bottom_post_kb import create_bottom_keyboard, create_tariffs_keyboard
+from keyboards.bottom_post_kb import create_bottom_keyboard, create_tariffs_keyboard, create_count_keyboard
 from keyboards.lang_menu import get_lang_menu
 from keyboards.commands_menu import set_commands_menu
 from services.chatgpt import get_answer
@@ -309,11 +309,46 @@ async def process_choice_tariff(callback: CallbackQuery):
 
 @router.message(Text(text=BUTTON['ru']['HISTORY_BUTTON']))
 @router.message(Text(text=BUTTON['en']['HISTORY_BUTTON']))
-async def process_remains_command(message: Message):
-        user_id = get_user_id(message.from_user.id)
-        text = MESSAGE[lang]['UNDER_DEVELOPMENT']
-        await message.answer(text=text, reply_markup=get_profile_menu(user_id))
+async def process_recent_command(callback: CallbackQuery):
+        user_id = get_user_id(callback.from_user.id)
+        global lang
+        lang = get_user_lang(user_id)
+        recent_prompts = get_recent_prompts(user_id, 10)
+        await callback.answer(text=MESSAGE[lang]['COUNT_OF_RECENT'],
+                          reply_markup=create_count_keyboard(
+                            '5', '10', '25', '50', width=4),
+                            parse_mode='HTML')
+        #text = '\n'.join([f'🔹 {prompt.text}' for prompt in recent_prompts])
+        #text = MESSAGE[lang]['UNDER_DEVELOPMENT']
+        #await message.answer(text=text, reply_markup=get_profile_menu(user_id))
 
+
+@router.callback_query(Text)
+async def process_choice_tariff(callback: CallbackQuery, bot: Bot):
+    count = int(callback.data)
+    print('#################', count)
+    user_id = get_user_id(callback.from_user.id)
+    recent_prompts = get_recent_prompts(user_id, count)
+    print(recent_prompts)
+    text = '\n'.join([f'🔹 {prompt.text}' for prompt in recent_prompts])
+    print(text)
+    try:
+        await callback.message.answer(text=text, reply_markup=get_profile_menu(user_id))
+    except TelegramBadRequest as error:
+            print(f'Telegram Exception: {error}')
+            await callback.message.answer(text=f'Слишком длиинное сообщение, попробуйте выбрать меньшее количество.')
+ 
+    
+
+async def process_show_tariffs_command(callback: CallbackQuery):
+    user_id = get_user_id(callback.from_user.id)
+    global lang
+    lang = get_user_lang(user_id)
+    tariffs = get_tariffs()
+    await callback.messsage.answer(text=MESSAGE[lang]['CHOOSE_TARIFF'],
+                          reply_markup=create_tariffs_keyboard(
+                            tariffs),
+                            parse_mode='HTML')
 
 
 @router.message(Command(commands='delmenu'))

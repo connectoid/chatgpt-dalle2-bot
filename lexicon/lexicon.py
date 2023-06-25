@@ -41,7 +41,7 @@ MESSAGE = {'ru': {
                 'такие промпты: <i>"An oil painting of a mechanical clockwork flying machine from the renaissance, '\
                 'Gorgeous digital painting, amazing art, artstation 3, realistic"</i> '\
                 'или <i>"a photo of cat flying out to space as an astronaut, digital art"</i>, но можно эксперементировать и на русском :) \n\n'\
-                '<u>Бот работает в демоснтрационном режиме, вы можете бесплатно выбрать любой тариф в разделе /profile</u>',
+                '<u>Бот работает в демонстрационном режиме, вы можете бесплатно выбрать любой тариф в разделе /profile</u>',
                 
                 'GPT_CHAT_TEXT': 'Пожалуйста, вводите запросы (prompt) к ChatGPT в режиме диалога. '\
                 'Для выхода из диалога с ChatGPT и возврата в главное меню введите команду /cancel '\
@@ -80,6 +80,7 @@ MESSAGE = {'ru': {
                 'TARIFF_SELECTED': 'Выбран тариф',
                 'PROMPTS_REMAINS': 'У вас осталось запросов:',
                 'YOUR_TARIFF': 'Ваш тариф: ',
+                'COUNT_OF_RECENT': 'Выберите количество последних запросов: ',
                 
             },
 
@@ -144,6 +145,7 @@ MESSAGE = {'ru': {
                 'TARIFF_SELECTED': 'Tariff selected',
                 'PROMPTS_REMAINS': 'You have requests left:',
                 'YOUR_TARIFF': 'Your tariff: ',
+                'COUNT_OF_RECENT': 'Select the number of recent queries: '
             },
 }
 

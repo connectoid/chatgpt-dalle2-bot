@@ -10,6 +10,14 @@ def create_bottom_keyboard(*buttons: str) -> InlineKeyboardMarkup:
         width=1)
     return kb_builder.as_markup()
 
+def create_count_keyboard(*buttons: str, width) -> InlineKeyboardMarkup:
+    kb_builder: InlineKeyboardBuilder = InlineKeyboardBuilder()
+    kb_builder.row(*[InlineKeyboardButton(
+        text=button,
+        callback_data=f'{button}') for button in buttons],
+        width=width)
+    return kb_builder.as_markup()
+
 def create_tariffs_keyboard(buttons: list) -> InlineKeyboardMarkup:
     kb_builder: InlineKeyboardBuilder = InlineKeyboardBuilder()
     kb_builder.row(*[InlineKeyboardButton(

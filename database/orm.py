@@ -141,9 +141,14 @@ def get_user_tariff(user_id):
 def get_tariffs():
     session = Session()
     tariffs = session.query(Tariff).all()
-    return tariffs
+    return tariffs[1:]
 
 def get_tariff_by_id(tariff_id):
     session = Session()
     tariff = session.query(Tariff).filter(Tariff.id == tariff_id).first()
     return tariff
+
+def get_recent_prompts(user_id, count):
+    session = Session()
+    recent_prompts = session.query(Prompt).filter(Prompt.owner == user_id).all()
+    return recent_prompts[-count:]
