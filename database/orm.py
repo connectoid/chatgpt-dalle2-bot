@@ -4,11 +4,14 @@ from sqlalchemy.orm import sessionmaker
 from .models import Base, User, Prompt, ApiKey, Tariff
 from config_data.config import load_config, Config
 
+POOL_SIZE = 20
+MAX_OVERFLOW = 0
+
 config: Config = load_config()
 
 database_url = f'postgresql://postgres:postgres@{config.db.db_host}:5432/{config.db.database}'
 
-engine = create_engine(database_url, echo=False)
+engine = create_engine(database_url, echo=False, pool_size=POOL_SIZE, max_overflow=MAX_OVERFLOW)
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 
