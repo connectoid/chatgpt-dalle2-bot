@@ -41,8 +41,7 @@ MESSAGE = {'ru': {
                 'такие промпты: <i>"An oil painting of a mechanical clockwork flying machine from the renaissance, '\
                 'Gorgeous digital painting, amazing art, artstation 3, realistic"</i> '\
                 'или <i>"a photo of cat flying out to space as an astronaut, digital art"</i>, но можно эксперементировать и на русском :) \n\n'\
-                '<u>Так как получение доступа к этим ИИ временно ограничено в России, его приходится покупать, '\
-                'поэтому после исчерпания количества бесплатных тестовых запросов, нужно оформлять подписку в разделе /profile</u>',
+                '<u>Бот работает в демоснтрационном режиме, вы можете бесплатно выбрать любой тариф в разделе /profile</u>',
                 
                 'GPT_CHAT_TEXT': 'Пожалуйста, вводите запросы (prompt) к ChatGPT в режиме диалога. '\
                 'Для выхода из диалога с ChatGPT и возврата в главное меню введите команду /cancel '\
@@ -75,7 +74,7 @@ MESSAGE = {'ru': {
                 'DENIED_IN_DIALOGUE': 'Эта команда недоступна в режиме диалога с ИИ. Для вызова данной команды '\
                 'нужно выйти из диалога командой /cancel или вы можете продолжить диалог.',
                 'LIMIT_RICHED': 'У вас не осталось оплаченных запросов, выйдите из диалога командой /cancel и '\
-                'выберите тариф в разделе Профиль /profile',
+                'выберите любой тариф в разделе Профиль /profile (это бесплатно)',
                 'CHOOSE_SECTION': 'Выберите раздел',
                 'UNDER_DEVELOPMENT': '👷‍♂️ Данный раздел пока в разработке',
                 'TARIFF_SELECTED': 'Выбран тариф',
@@ -103,9 +102,8 @@ MESSAGE = {'ru': {
                 'of a mechanical clockwork flying machine from the renaissance, Gorgeous digital '\
                 'painting, amazing art, artstation 3, realistic"</i> or <i>"a photo of cat flying '\
                 'out to space as an astronaut, digital art"</i>, but you can also experiment with '\
-                'Russian ones 🙂 \n\nSince access to these AIs is temporarily restricted in Russia, '\
-                'it has to be purchased, so after testing the limited free requests, you need to '\
-                'subscribe in the /profile section.',
+                'Russian ones 🙂 \n\nBot is running in demo mode. You can choose any tariff for free '\
+                'in the /profile section.',
                 
                 'GPT_CHAT_TEXT': 'Please enter your queries to ChatGPT in dialogue mode. '\
                 'To exit the ChatGPT dialogue and return to the main menu, type the command /cancel '\
@@ -140,7 +138,7 @@ MESSAGE = {'ru': {
                 'To use this command,  you need to exit the dialog by using the /cancel '\
                 'command or you can continue the dialog.',
                 'LIMIT_RICHED': 'You have no paid requests left, please exit the dialog by command /cancel '\
-                'and select a tariff in the Profile section /profile.',
+                'and select any tariff in the Profile section /profile (it is for free).',
                 'CHOOSE_SECTION': 'Please select a section.',
                 'UNDER_DEVELOPMENT': '👷‍♂️ This section is still under development.',
                 'TARIFF_SELECTED': 'Tariff selected',
