@@ -47,7 +47,7 @@ class FSMFeedback(StatesGroup):
     feedback_text = State()
 
 lang = 'ru'
-broadcast_list = [
+test_broadcast_list = [
     '101676827'     # i am
     '138269086',    # Andrey
     '5352380322',   # Nadya
@@ -58,7 +58,13 @@ broadcast_list = [
     '258516554',    # Polina
     ]
 
-test_broadcast_list = ['123456789']
+broadcast_list = ['101676827']
+
+
+@router.message(~F.text)
+async def content_type_example(msg: Message):
+    await msg.answer('👍')
+
 
 @router.message(CommandStart(), StateFilter(default_state))
 @router.message(Text(text=BUTTON['ru']['MAIN_MENU_BUTTON']))
