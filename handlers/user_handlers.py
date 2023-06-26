@@ -30,6 +30,7 @@ from services.chatgpt import get_answer
 from services.dalle2 import get_picture
 from config_data.config import Config, load_config
 from utils.utils import send_to_admin
+from filters.user_type import IsAdminFilter
 
 storage = MemoryStorage()
 router = Router()
@@ -47,6 +48,8 @@ class FSMFeedback(StatesGroup):
     feedback_text = State()
 
 lang = 'ru'
+switch_reporting = True
+
 test_broadcast_list = [
     '101676827'     # i am
     '138269086',    # Andrey
@@ -99,6 +102,8 @@ async def process_cancel_command_state(message: Message, state: FSMContext):
 @router.message(Command(commands='help'), ~StateFilter(default_state))
 @router.message(Command(commands='feedback'), ~StateFilter(default_state))
 @router.message(Command(commands='lang'), ~StateFilter(default_state))
+@router.message(Command(commands='broadcast'), ~StateFilter(default_state))
+@router.message(Command(commands='switch_reporting'), ~StateFilter(default_state))
 async def process_cancel_command_state(message: Message, state: FSMContext):
     user_id = get_user_id(message.from_user.id)
     await message.answer(text=MESSAGE[lang]['DENIED_IN_DIALOGUE'])
@@ -199,12 +204,13 @@ async def process_gpt_prompt_sent(message: Message, state: FSMContext):
         save_user_prompt(user_id, message.text, is_chat_prompt=True)
         text_answer = get_answer(message.text, user_id)
         await message.answer(text=str(text_answer), reply_markup=get_answer_repeat_menu(user_id), parse_mode="markdown")
-        if str(message.from_user.id) != str(config.tg_bot.admin_chat_id):
+        if (str(message.from_user.id) != str(config.tg_bot.admin_chat_id)) and switch_reporting:
             await send_to_admin(
                 message,
                 text=f'Пользователь {user_name} '\
                 f'отправил запрос:\n"{message.text}" \n'\
-                f'и получил ответ:\n"{text_answer}"'
+                f'и получил ответ:\n"{text_answer}"',
+                parse_mode='Markdown'
                 )
 
 @router.message(Text(text=BUTTON['ru']['REPEAT_BUTTON']), StateFilter(FSMChatGPT.gpt_text_prompt))
@@ -219,11 +225,12 @@ async def process_repeat_gpt_prompt_command(message: Message, state: FSMContext)
     else:
         text_answer = get_answer(prompt, user_id)
         await message.answer(text=str(text_answer), reply_markup=get_answer_repeat_menu(user_id), parse_mode="markdown")
-        if str(message.from_user.id) != str(config.tg_bot.admin_chat_id):
+        if (str(message.from_user.id) != str(config.tg_bot.admin_chat_id)) and switch_reporting:
             await send_to_admin(
                 message,
                 text=f'Пользователь {user_name} '\
-                f'повторил запрос и получил ответ:\n"{text_answer}"'
+                f'повторил запрос и получил ответ:\n"{text_answer}"',
+                parse_mode='Markdown'
                 )
 
 
@@ -363,7 +370,9 @@ async def del_main_menu(message: Message, bot: Bot):
     await message.answer(text='Кнопка "Menu" удалена')
 
 
-@router.message(Command(commands='broadcast'), StateFilter(default_state))
+@router.message(IsAdminFilter(is_admin=True),
+                Command(commands='broadcast'),
+                StateFilter(default_state))
 async def process_feedback_command(message: Message, bot: Bot):
     user_id = get_user_id(message.from_user.id)
     global lang
@@ -376,4 +385,17 @@ async def process_feedback_command(message: Message, bot: Bot):
         except TelegramBadRequest as error:
             print(f'Telegram Exception: {error}')
             await message.answer(text=f'Несуществующий Telegram ID: {user_id}')
+
+
+@router.message(IsAdminFilter(is_admin=True),
+                Command(commands='switch_reporting'),
+                StateFilter(default_state))
+async def process_echo_on_command(message: Message, bot: Bot):
+    global switch_reporting
+    if switch_reporting:
+        await message.answer(text=f'Отчеты о запросах пользователей выключены')
+        switch_reporting = False
+    else:
+        await message.answer(text=f'Отчеты о запросах пользователей включены')
+        switch_reporting = True
 
