@@ -85,7 +85,7 @@ async def process_start_command(message: Message, bot: Bot):
     tariff = get_user_tariff(user_id)
     if not tariff:
         print(f'Setting free tariff for user {user_id}')
-        set_user_tariff(user_id, 0)
+        set_user_tariff(user_id, 1)
     await set_commands_menu(bot, user_id)
     if new_user:
         await message.answer(

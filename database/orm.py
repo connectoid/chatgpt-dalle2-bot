@@ -9,7 +9,10 @@ MAX_OVERFLOW = 0
 
 config: Config = load_config()
 
-database_url = f'postgresql://admin:s028006000434@{config.db.db_host}:5432/{config.db.database}'
+db_user = config.db.db_user
+db_password = config.db.db_password
+
+database_url = f'postgresql://{db_user}:{db_password}@{config.db.db_host}:5432/{config.db.database}'
 # database_url = f'postgresql://postgres:postgres@{config.db.db_host}:5432/{config.db.database}'
 
 engine = create_engine(database_url, echo=False, pool_size=POOL_SIZE, max_overflow=MAX_OVERFLOW)
