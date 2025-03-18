@@ -9,7 +9,8 @@ MAX_OVERFLOW = 0
 
 config: Config = load_config()
 
-database_url = f'postgresql://postgres:postgres@{config.db.db_host}:5432/{config.db.database}'
+database_url = f'postgresql://admin:s028006000434@{config.db.db_host}:5432/{config.db.database}'
+# database_url = f'postgresql://postgres:postgres@{config.db.db_host}:5432/{config.db.database}'
 
 engine = create_engine(database_url, echo=False, pool_size=POOL_SIZE, max_overflow=MAX_OVERFLOW)
 Base.metadata.create_all(engine)
@@ -23,6 +24,8 @@ def add_user(tg_id, fname, lname):
         new_user = User(tg_id=tg_id, fname=fname, lname=lname)
         session.add(new_user)
         session.commit()
+        return True
+    return False
 
 
 def get_user_id(tg_id):

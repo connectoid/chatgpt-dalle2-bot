@@ -18,8 +18,11 @@ storage = MemoryStorage()
 async def main():
     logging.basicConfig(
         level=logging.INFO,
-        format=u'%(filename)s:%(lineno)d #%(levelname)-8s '
-               u'[%(asctime)s] - %(name)s - %(message)s')
+        filename = "botlog.log",
+        filemode='a',
+        format = "%(asctime)s - %(module)s - %(levelname)s - %(funcName)s: %(lineno)d - %(message)s",
+        datefmt='%H:%M:%S',
+        )
     logger.info('Starting bot')
     
     config: Config = load_config()

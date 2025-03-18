@@ -5,7 +5,7 @@ import openai
 from aiogram import Bot, Dispatcher, F, Router
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import Command, CommandStart, Text, StateFilter
-from aiogram.types import CallbackQuery, Message, ReplyKeyboardRemove
+from aiogram.types import CallbackQuery, Message, ReplyKeyboardRemove, LabeledPrice
 from aiogram.filters.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state
@@ -76,20 +76,26 @@ async def process_start_command(message: Message, bot: Bot):
     fname = message.from_user.first_name
     lname = message.from_user.last_name
     tg_id = message.from_user.id
-    add_user(tg_id, fname, lname)
+    new_user = False
+    if add_user(tg_id, fname, lname):
+        new_user = True
     user_id = get_user_id(message.from_user.id)
     global lang
     lang = get_user_lang(user_id)
     tariff = get_user_tariff(user_id)
-    print('TARIFF:', tariff)
     if not tariff:
         print(f'Setting free tariff for user {user_id}')
         set_user_tariff(user_id, 0)
     await set_commands_menu(bot, user_id)
-    await message.answer(
+    if new_user:
+        await message.answer(
+        text=MESSAGE[lang]['START_MESSAGE'] + '\n\n' + MESSAGE[lang]['FIRST_START'],
+        reply_markup=get_main_menu(user_id))
+    else:
+        await message.answer(
         text=MESSAGE[lang]['START_MESSAGE'],
-        reply_markup=get_main_menu(user_id)
-    )
+        reply_markup=get_main_menu(user_id))
+
 
 @router.message(Command(commands='cancel'), ~StateFilter(default_state))
 async def process_cancel_command_state(message: Message, state: FSMContext):
@@ -304,20 +310,41 @@ async def process_show_tariffs_command(callback: CallbackQuery):
     tariffs = get_tariffs()
     await callback.answer(text=MESSAGE[lang]['CHOOSE_TARIFF'],
                           reply_markup=create_tariffs_keyboard(
-                            tariffs),
+                            tariffs, lang),
                             parse_mode='HTML')
 
 
 @router.callback_query(Text(startswith='tariff'))
-async def process_choice_tariff(callback: CallbackQuery):
+async def process_choice_tariff(callback: CallbackQuery, bot: Bot):
     tariff_id = int(callback.data.split()[1])
-    tariiff_name = get_tariff_by_id(tariff_id).name
+    tariff = get_tariff_by_id(tariff_id)
+    tariff_price = int(tariff.price) * 100
+    print('++++++++++++++', tariff_price)
     user_id = get_user_id(callback.from_user.id)
     global lang
     lang = get_user_lang(user_id)
     set_user_tariff(user_id, tariff_id)
     TARIFF_SELECTED = MESSAGE[lang]['TARIFF_SELECTED']
-    await callback.message.answer(text=f'{TARIFF_SELECTED} {tariiff_name}')
+    # await callback.message.answer(text=f'{TARIFF_SELECTED} {tariiff_name}')
+    PAYMENTS_PROVIDER_TOKEN = config.payment.paymen_provider_token
+    TIME_MACHINE_IMAGE_URL = 'http://'
+    PRICE = LabeledPrice(label=f'{MESSAGE[lang]["TARIFF_WORD"]} {tariff.name}', amount=tariff_price)
+    DESCRIPTION = text=f'{MESSAGE[lang]["TARIFF_WORD"]} {tariff.name}, {tariff.gpt_amount} {MESSAGE[lang]["PROMPTS_WORD"]}, {tariff.price} {MESSAGE[lang]["CURRENCY_WORD"]}'
+    await bot.send_invoice(
+            callback.message.chat.id,
+            title=f'{MESSAGE[lang]["TARIFF_WORD"]} {tariff.name}',
+            description=DESCRIPTION,
+            provider_token=PAYMENTS_PROVIDER_TOKEN,
+            currency='rub',
+            photo_url=TIME_MACHINE_IMAGE_URL,
+            photo_height=512,  # !=0/None, иначе изображение не покажется
+            photo_width=512,
+            photo_size=512,
+            is_flexible=False,  # True если конечная цена зависит от способа доставки
+            prices=[PRICE],
+            start_parameter='time-machine-example',
+            payload='some-invoice-payload-for-our-internal-use'
+        )
 
 
 @router.message(Text(text=BUTTON['ru']['HISTORY_BUTTON']))
@@ -331,15 +358,11 @@ async def process_recent_command(callback: CallbackQuery):
                           reply_markup=create_count_keyboard(
                             '5', '10', '25', '50', width=4),
                             parse_mode='HTML')
-        #text = '\n'.join([f'🔹 {prompt.text}' for prompt in recent_prompts])
-        #text = MESSAGE[lang]['UNDER_DEVELOPMENT']
-        #await message.answer(text=text, reply_markup=get_profile_menu(user_id))
 
 
 @router.callback_query(Text)
 async def process_choice_tariff(callback: CallbackQuery, bot: Bot):
     count = int(callback.data)
-    print('#################', count)
     user_id = get_user_id(callback.from_user.id)
     recent_prompts = get_recent_prompts(user_id, count)
     print(recent_prompts)
@@ -398,4 +421,3 @@ async def process_echo_on_command(message: Message, bot: Bot):
     else:
         await message.answer(text=f'Отчеты о запросах пользователей включены')
         switch_reporting = True
-

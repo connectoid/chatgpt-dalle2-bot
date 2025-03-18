@@ -16,9 +16,15 @@ class TgBot:
 
 
 @dataclass
+class Payment:
+    paymen_provider_token: str
+
+
+@dataclass
 class Config:
     tg_bot: TgBot
     db: DatabaseConfig
+    payment: Payment
 
 
 def load_config(path: str = None):
@@ -28,7 +34,9 @@ def load_config(path: str = None):
 
     return Config(tg_bot=TgBot(token=env('BOT_TOKEN'),
                                admin_chat_id=env('ADMIN_CHAT_ID')),
-                  db=DatabaseConfig(database=env('DATABASE'),
+                    db=DatabaseConfig(database=env('DATABASE'),
                                     db_host=env('DB_HOST'),
                                     db_user=env('DB_USER'),
-                                    db_password=env('DB_PASSWORD')))
+                                    db_password=env('DB_PASSWORD')),
+                    payment=Payment(paymen_provider_token=env('PAYMENTS_PROVIDER_TOKEN')),
+                    )
