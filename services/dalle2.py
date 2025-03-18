@@ -1,5 +1,5 @@
 import openai
-from openai import RateLimitError, AuthenticationError
+from openai.error import RateLimitError, AuthenticationError
 
 from config_data.config import Config, load_config
 from database.orm import get_openai_api_key, disable_openai_api_key

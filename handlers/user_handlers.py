@@ -207,8 +207,10 @@ async def process_gpt_prompt_sent(message: Message, state: FSMContext):
     if not change_gpt_count(user_id):
         await message.answer(text=MESSAGE[lang]['LIMIT_RICHED'])
     else:
+        print(f'ChatGPT prompt sended: {message.text}')
         save_user_prompt(user_id, message.text, is_chat_prompt=True)
         text_answer = get_answer(message.text, user_id)
+        print(f'Answer: {text_answer}')
         await message.answer(text=str(text_answer), reply_markup=get_answer_repeat_menu(user_id), parse_mode="markdown")
         if (str(message.from_user.id) != str(config.tg_bot.admin_chat_id)) and switch_reporting:
             await send_to_admin(
@@ -308,6 +310,7 @@ async def process_show_tariffs_command(callback: CallbackQuery):
     global lang
     lang = get_user_lang(user_id)
     tariffs = get_tariffs()
+    print(f'Tariffs from handler: {tariffs}')
     await callback.answer(text=MESSAGE[lang]['CHOOSE_TARIFF'],
                           reply_markup=create_tariffs_keyboard(
                             tariffs, lang),

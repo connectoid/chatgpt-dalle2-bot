@@ -17,6 +17,25 @@ Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 
 
+def init_tariffs():
+    print('Start init tarrifs')
+    session = Session()
+    tariff = session.query(Tariff)
+    first_tariff = session.query(Tariff).first()
+    if first_tariff:
+        print(f'Tariff id exists: {first_tariff}')
+    else:
+        print(f'Creating tariff')
+        new_tariff = Tariff(
+            name='Free',
+            price=0,
+            gpt_amount=10,
+            dalle_amount=10
+        )
+        session.add(new_tariff)
+        session.commit()
+
+
 def add_user(tg_id, fname, lname):
     session = Session()
     user = session.query(User).filter(User.tg_id == tg_id).first()
@@ -25,7 +44,7 @@ def add_user(tg_id, fname, lname):
         session.add(new_user)
         session.commit()
         return True
-    return False
+    return False 
 
 
 def get_user_id(tg_id):
@@ -144,7 +163,8 @@ def get_user_tariff(user_id):
 def get_tariffs():
     session = Session()
     tariffs = session.query(Tariff).all()
-    return tariffs[1:]
+    print(f'Tariffs from ORM: {tariffs}')
+    return tariffs
 
 def get_tariff_by_id(tariff_id):
     session = Session()

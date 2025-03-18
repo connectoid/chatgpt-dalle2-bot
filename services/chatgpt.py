@@ -1,5 +1,5 @@
 import openai
-from openai import RateLimitError, AuthenticationError
+from openai.error import RateLimitError, AuthenticationError
 
 from config_data.config import Config, load_config
 from database.orm import get_openai_api_key, disable_openai_api_key
@@ -56,14 +56,19 @@ def reset_messages():
 
 
 def get_answer(prompt, user):
+    print('get_unswer started')
     current_openai_api_key = get_openai_api_key()
+    print(f'Current openai key: {current_openai_api_key}')
     openai.api_key = current_openai_api_key
     try:
         update(messages, "user", prompt)
+        print('Completion start')
         completion = openai.ChatCompletion.create(
             model=engine,
             messages=messages,
         )
+        print('Completion finish')
+
         if completion['usage']['total_tokens'] >= MAX_TOKEN_COUNT:
             reset_messages()
             print(TOKEN_ERROR_MESSAGE, completion['usage']['total_tokens'])
@@ -73,7 +78,9 @@ def get_answer(prompt, user):
         print('Ответ от ChatGPT:', completion.choices[0].message.content)
         print('Количество токенов:', completion['usage']['total_tokens'])
         print('='*10)
-        return completion.choices[0].message.content
+        answer = completion.choices[0].message.content
+        print(f'Answeer from gpt: {answer}')
+        return answer
 
     except TypeError as error:
         print('Ошибка: ', error)

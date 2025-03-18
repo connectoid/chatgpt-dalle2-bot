@@ -9,7 +9,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from config_data.config import Config, load_config
 from handlers import other_handlers, user_handlers
 from keyboards.commands_menu import set_commands_menu
-
+from database.orm import init_tariffs
 
 logger = logging.getLogger(__name__)
 storage = MemoryStorage()
@@ -43,6 +43,7 @@ async def main():
 
 if __name__ == '__main__':
     try:
+        init_tariffs()
         asyncio.run(main())
     except (KeyboardInterrupt, SystemExit):
         logger.error('Bot stopped')
