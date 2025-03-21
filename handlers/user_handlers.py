@@ -27,7 +27,7 @@ from keyboards.bottom_post_kb import create_bottom_keyboard, create_tariffs_keyb
 from keyboards.lang_menu import get_lang_menu
 from keyboards.commands_menu import set_commands_menu
 from services.chatgpt import get_answer
-from services.dalle2 import get_picture
+from services.dalle3 import get_picture
 from config_data.config import Config, load_config
 from utils.utils import send_to_admin
 from filters.user_type import IsAdminFilter
@@ -188,7 +188,7 @@ async def process_back_command(message: Message, state: FSMContext):
     await state.clear()
 
 
-@router.message(Text(text='🤖 ChatGPT'), StateFilter(default_state))
+@router.message(Text(text='🤖 ChatGPT-4'), StateFilter(default_state))
 async def process_send_gpt_prompt_command(message: Message, state: FSMContext):
     user_id = get_user_id(message.from_user.id)
     global lang
@@ -242,7 +242,7 @@ async def process_repeat_gpt_prompt_command(message: Message, state: FSMContext)
                 )
 
 
-@router.message(Text(text='👨‍🎨 DALL-E2'), StateFilter(default_state))
+@router.message(Text(text='👨‍🎨 DALL-E3'), StateFilter(default_state))
 async def process_send_dalle2_prompt_command(message: Message, state: FSMContext):
     user_id = get_user_id(message.from_user.id)
     await message.answer(text=MESSAGE[lang]['DALLE_CHAT_TEXT'],
@@ -253,13 +253,17 @@ async def process_send_dalle2_prompt_command(message: Message, state: FSMContext
 
 @router.message(StateFilter(FSMDallE2.dalle2_text_prompt), ~Text(text=BUTTON[lang]['REPEAT_BUTTON']))
 async def process_dalle2_prompt_sent(message: Message, state: FSMContext):
+    print('DALLE-3 handler activated')
     await state.update_data(prompt=message.text)
     user_id = get_user_id(message.from_user.id)
+    user_name = f'{message.from_user.first_name} {message.from_user.last_name}'
     if not change_dalle_count(user_id):
         await message.answer(MESSAGE[lang]['LIMIT_RICHED'])
     else:
         save_user_prompt(user_id, message.text, is_chat_prompt=False)
-        image_answer = get_picture(message.text)
+        print('Starting get_picture in handler')
+        image_answer = get_picture(message.text, user_name)
+        print('Finished get_picture in handler')
         await message.answer_photo(photo=image_answer, reply_markup=get_answer_repeat_menu(user_id))
 
 
@@ -269,10 +273,11 @@ async def process_repeat_dalle2_prompt_command(message: Message, state: FSMConte
     prompt_dict = await state.get_data()
     prompt = prompt_dict['prompt']
     user_id = get_user_id(message.from_user.id)
+    user_name = f'{message.from_user.first_name} {message.from_user.last_name}'
     if not change_gpt_count(user_id):
         await message.answer(MESSAGE[lang]['LIMIT_RICHED'])
     else:
-        image_answer = get_picture(prompt)
+        image_answer = get_picture(prompt, user_name)
         await message.answer_photo(photo=image_answer, reply_markup=get_answer_repeat_menu(user_id))
 
 

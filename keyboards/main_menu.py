@@ -8,8 +8,8 @@ from database.orm import get_user_lang
 
 def get_main_menu(user_id):
     lang = get_user_lang(user_id)
-    button_1: KeyboardButton = KeyboardButton(text='🤖 ChatGPT')
-    button_2: KeyboardButton = KeyboardButton(text='👨‍🎨 DALL-E2')
+    button_1: KeyboardButton = KeyboardButton(text='🤖 ChatGPT-4')
+    button_2: KeyboardButton = KeyboardButton(text='👨‍🎨 DALL-E3')
     button_3: KeyboardButton = KeyboardButton(text=BUTTON[lang]['HELP_BUTTON'])
     button_4: KeyboardButton = KeyboardButton(text=BUTTON[lang]['PROFILE_BUTTON'])
 

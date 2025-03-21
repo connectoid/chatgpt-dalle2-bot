@@ -26,7 +26,7 @@ BUTTON = {'ru':{'MAIN_MENU_BUTTON':'🏠 Главное меню',
 
 MESSAGE = {'ru': {
                 'FIRST_START': 'Вам доступен тестовый тариф, который включает 10 бесплатных запросов к '\
-                'ChatGPT и DALL-E2. После исчерпания тестовых запросов, вам нужно выбрать и оплатить тариф '\
+                'ChatGPT-4 и DALL-E3. После исчерпания тестовых запросов, вам нужно выбрать и оплатить тариф '\
                 'в разделе "ℹ️ Профиль" или вызвав команду /profile',
                 'LEXICON_HELP': 'Данный бот отвечает на любые вопросы и генерирует любые изображения по текстовому описанию.\n\n'\
                 'За тектовый диалог отвечает искусственный интелект на основе нейронной сети (ИИ) <b>ChatGPT</b>. '\
@@ -93,7 +93,7 @@ MESSAGE = {'ru': {
 
             'en': {
                 'FIRST_START': 'You have access to the trial plan, which includes 10 free requests '\
-                'to ChatGPT and DALL-E2. After exhausting the trial requests, you need to choose '\
+                'to ChatGPT-4 and DALL-E3. After exhausting the trial requests, you need to choose '\
                 'and pay for a plan in the "ℹ️ Profile" section or by using the command /profile.',
                 'LEXICON_HELP': 'This bot can answer any question and generate any image based '\
                 'on text description. The <b>ChatGPT</b> artificial intelligence neural network '\
