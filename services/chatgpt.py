@@ -33,8 +33,6 @@ def get_answer(prompt, user):
 
         print('Completion finish')
 
-        print(completion)
-        return None
     
 
         print('='*100)
