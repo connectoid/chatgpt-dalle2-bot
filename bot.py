@@ -49,6 +49,7 @@ async def main():
     scheduler.start()
 
     await bot.delete_webhook(drop_pending_updates=True)
+    print('Start polling')
     await dp.start_polling(bot)
 
 
@@ -56,30 +57,32 @@ async def request_events(dp: Dispatcher):
     ids = read_ids_from_file()
     print('Запрашиваем события через планировщик')
     events = get_events()
-    if compare_and_update_dict(events):
-        message_text = create_message_text(events)
-        if message_text:
-            for id in ids:
-                await bot.send_message(
-                    chat_id=id,
-                    text=message_text, 
-                    reply_markup=get_main_menu()
-                )
+    if events:
+        if compare_and_update_dict(events):
+            message_text = create_message_text(events)
+            if message_text:
+                for id in ids:
+                    await bot.send_message(
+                        chat_id=id,
+                        text=message_text, 
+                        reply_markup=get_main_menu()
+                    )
+            else:
+                for id in ids:
+                    await bot.send_message(
+                        chat_id=id,
+                        text='Exception in scheduler', 
+                        reply_markup=get_main_menu()
+                    )
         else:
-            for id in ids:
-                await bot.send_message(
-                    chat_id=id,
-                    text='Exception in scheduler', 
-                    reply_markup=get_main_menu()
-                )
+            print('No changes')
     else:
-        print('No changes')
         for id in ids:
-                await bot.send_message(
-                    chat_id=id,
-                    text='No changes', 
-                    reply_markup=get_main_menu()
-                )
+            await bot.send_message(
+                chat_id=id,
+                text='Произошла ошибка ,смотри логи', 
+                reply_markup=get_main_menu()
+            )
 
 
 async def schedule_jobs():

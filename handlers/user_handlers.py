@@ -22,28 +22,36 @@ async def content_type_example(msg: Message):
 async def process_start_command(message: Message, bot: Bot):
         user_id = message.from_user.id
         add_userid_to_file(user_id)
+        print('start pressed')
         await message.answer(
-        text='Hello message',
+        text='Запущен бот для мониторинга изменения событий на странице https://tickets.hclokomotiv.ru, проверка запускается каждую минуту.',
         reply_markup=get_main_menu())
 
 
 @router.message(Text(text='Проверить'))
 async def process_button_1_command(message: Message):
+    print('Check pressed')
     events = get_events()
-    if compare_and_update_dict(events):
-        message_text = create_message_text(events)
-        if message_text:
-            await message.answer(
-                text=message_text, 
-                reply_markup=get_main_menu()
-            )
+    if events:
+        if compare_and_update_dict(events):
+            message_text = create_message_text(events)
+            if message_text:
+                await message.answer(
+                    text=message_text, 
+                    reply_markup=get_main_menu()
+                )
+            else:
+                await message.answer(
+                    text='Произошла ошибка, смотри логи', 
+                    reply_markup=get_main_menu()
+                )
         else:
             await message.answer(
-                text='Произошла ошибка, смотри логи', 
-                reply_markup=get_main_menu()
-            )
+                    text='Данные не изменились', 
+                    reply_markup=get_main_menu()
+                )
     else:
          await message.answer(
-                text='Данные не изменились', 
-                reply_markup=get_main_menu()
-            )
+                    text='Произошла ошибка, смотри логи', 
+                    reply_markup=get_main_menu()
+                )

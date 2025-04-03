@@ -19,6 +19,7 @@ def get_events():
             event_json['datetime'] = event['startTimestampStr']
             event_json['unit'] = event['unitName']
             events_json.append(event_json)
+            print(events_json)
         return events_json
     except Exception as e:
         print(f'Exception in get_events: {e}')
